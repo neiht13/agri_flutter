@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyBPxadFlylLaC2HAsIm_jQOWA7gUg_j8sQ</string>
+	<key>GCM_SENDER_ID</key>
+	<string>542478251453</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.agricplant.agriplant</string>
+	<key>PROJECT_ID</key>
+	<string>agribean-c8a33</string>
+	<key>STORAGE_BUCKET</key>
+	<string>agribean-c8a33.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:542478251453:ios:06e4b1eb4bca18e2a64ed4</string>
+</dict>
+</plist>

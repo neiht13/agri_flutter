@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "542478251453",
+    "project_id": "agribean-c8a33",
+    "storage_bucket": "agribean-c8a33.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:542478251453:android:9d83debf4a35c3c2a64ed4",
+        "android_client_info": {
+          "package_name": "com.example.agricplant.agriplant"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCcShlklRLEjCOtU-KF9AZ3CA1Q_732XAQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
