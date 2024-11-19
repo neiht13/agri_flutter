@@ -4,14 +4,10 @@ import 'package:agriplant/models/cubit/user/user_cubit.dart';
 import 'package:agriplant/utils/contants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pretty_qr_code/pretty_qr_code.dart'; // Thêm import cho pretty_qr_code
-import 'package:screenshot/screenshot.dart'; // Thêm import cho screenshot
-import 'package:path_provider/path_provider.dart'; // Thêm import cho path_provider
-import 'package:permission_handler/permission_handler.dart'; // Thêm import cho permission_handler
-import 'dart:io'; // Thêm import cho File
-import 'dart:typed_data'; // Thêm import cho Uint8List
+import 'package:pretty_qr_code/pretty_qr_code.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -21,8 +17,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  // Tạo một ScreenshotController để chụp ảnh màn hình của QR code
-  final ScreenshotController _screenshotController = ScreenshotController();
+  late QrImage qrImage;
 
   @override
   void initState() {
@@ -75,7 +70,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               );
             },
-            icon: const Icon(FontAwesomeIcons.rightFromBracket),
+            icon: const Icon(IconlyBroken.logout),
           ),
         ],
       ),
@@ -85,8 +80,17 @@ class _ProfilePageState extends State<ProfilePage> {
             return const Center(child: CircularProgressIndicator());
           }
           if (state is UserLoaded) {
+
             var user = state.user;
 
+                                  var url = baseUrl.replaceAll("api", "") + 'timeline?user=${user?.username}';
+
+              final qrCode = QrCode(
+            4,
+            QrErrorCorrectLevel.M,
+          )..addData(url);
+
+          qrImage = QrImage(qrCode);
             return ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
@@ -220,77 +224,29 @@ class _ProfilePageState extends State<ProfilePage> {
                   ],
                 ),
                 const SizedBox(height: 20),
-                // Thêm QR Code vào cuối trang
-                Center(
-                  child: Column(
-                    children: [
-                      Text(
-                        'QR Code của bạn',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 10),
-                      // Bọc PrettyQr bằng Screenshot để chụp ảnh QR code
-                      Screenshot(
-                        controller: _screenshotController,
-                        child: PrettyQr(
-                          typeNumber: 4,
-                          size: 200,
-                          data: 'https://localhost/timeline?user=${user?.username ?? ''}',
-                          errorCorrectLevel: QrErrorCorrectLevel.M,
-                          roundEdges: true,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      ElevatedButton.icon(
-                        onPressed: () async {
-                          try {
-                            // Chụp ảnh QR code
-                            final Uint8List? image = await _screenshotController.capture();
-                            if (image == null) return;
-
-                            // Yêu cầu quyền lưu trữ
-                            var status = await Permission.storage.request();
-                            if (status.isGranted) {
-                              // Lấy đường dẫn lưu trữ
-                              final directory = await getExternalStorageDirectory();
-                              if (directory == null) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Không thể lấy đường dẫn lưu trữ')),
-                                );
-                                return;
-                              }
-
-                              // Tạo tệp mới để lưu QR code
-                              final path = directory.path;
-                              final file = File('$path/qrcode_${user?.username ?? 'user'}.png');
-                              await file.writeAsBytes(image);
-
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('QR Code đã được lưu vào $path')),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Không có quyền truy cập lưu trữ')),
-                              );
-                            }
-                          } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Lỗi khi lưu QR Code: $e')),
-                            );
-                          }
-                        },
-                        icon: Icon(Icons.download),
-                        label: Text('Tải xuống QR Code'),
-                      ),
-                    ],
+                
+               Container(
+                height: 200,
+                width: 200,
+                alignment: Alignment.center,
+                 child: PrettyQrView(
+                    qrImage: qrImage,
+                    decoration: const PrettyQrDecoration(
+                      background: Colors.white,
+                      shape: PrettyQrSmoothSymbol(
+                        color: primaryColor
+                      )
+                     
+                    ),
                   ),
-                ),
+               ),
                 const SizedBox(height: 20),
                 // Thêm các phần khác nếu cần
               ],
             );
           }
           return const SizedBox();
+          
         },
       ),
     );

@@ -11,6 +11,7 @@ import 'package:agriplant/routes.dart';
 import 'package:agriplant/widgets/custom_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -415,7 +416,7 @@ class _FarmingLogPageState extends State<FarmingLogPage> {
               badgeStyle: badges.BadgeStyle(
                 badgeColor: primaryColor,
               ),
-              child: const CustomIcon(FontAwesomeIcons.bell),
+              child: const CustomIcon(IconlyBroken.notification),
             ),
           ),
         ),

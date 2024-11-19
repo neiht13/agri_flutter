@@ -14,7 +14,7 @@ class _ContactListPageState extends State<ContactListPage> {
   @override
   void initState() {
     super.initState();
-    futureContacts = fetchContacts();
+    // futureContacts = fetchContacts();
   }
 
   @override
@@ -28,15 +28,15 @@ class _ContactListPageState extends State<ContactListPage> {
             itemCount: contacts!.length,
             itemBuilder: (context, index) {
               return ListTile(
-                title: Text(contacts[index].name),
-                subtitle: Text(contacts[index].email),
+                title: Text(contacts[index].name ??""),
+                subtitle: Text(contacts[index].email ??""),
                 trailing: Switch(
                   value: contacts[index].status,
                   onChanged: (bool value) {
                     setState(() {
                       contacts[index].status = value;
                       // Gọi hàm để cập nhật trạng thái trên server nếu cần
-                      updateStatus(contacts[index].id, value);
+                      // Contact().updateStatus(contacts[index].id, value);
                     });
                   },
                 ),

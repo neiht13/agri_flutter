@@ -37,6 +37,10 @@ dependencies:
   pdf: ^3.11.1
   collection: ^1.18.0
   fl_chart: ^0.69.0
+  pretty_qr_code: ^3.3.0
+  screenshot: ^3.0.0
+  universal_html: ^2.2.4
+  image_gallery_saver: ^2.0.3
 
 dev_dependencies:
   flutter_test:
