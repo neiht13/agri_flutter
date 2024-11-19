@@ -110,44 +110,50 @@ class _FarmingLogFormState extends State<FarmingLogForm> {
     }
 
     // Khởi tạo danh sách sản phẩm từ Cubit nếu có FarmingLog
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final agrochemicalsCubit = context.read<AgrochemicalsCubit>()
-        ..fetchAgrochemicalss(widget.log);
-      if (widget.log != null) {
-        if (widget.log!.agrochemicals != null &&
-            widget.log!.agrochemicals!.isNotEmpty) {
-          agrochemicalsCubit.setAgrochemicalss(
-              List<Agrochemicals>.from(widget.log!.agrochemicals!));
+
+    if(widget.log != null){
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final agrochemicalsCubit = context.read<AgrochemicalsCubit>()
+          ..fetchAgrochemicalss(widget.log);
+        if (widget.log != null) {
+          if (widget.log!.agrochemicals != null &&
+              widget.log!.agrochemicals!.isNotEmpty) {
+            agrochemicalsCubit.setAgrochemicalss(
+                List<Agrochemicals>.from(widget.log!.agrochemicals!));
+          } else {
+            // Nếu không có sản phẩm từ FarmingLog, thêm sản phẩm dựa trên công việc
+            List<Agrochemicals> initialAgrochemicalss = [];
+            if (widget.log!.tenPhan != null && widget.log!.tenPhan!.isNotEmpty) {
+              initialAgrochemicalss.add(Agrochemicals(
+                name: widget.log!.tenPhan!,
+                type: 'fertilizer',
+                isOrganic: false,
+              ));
+            }
+            if (widget.log!.tenThuoc != null &&
+                widget.log!.tenThuoc!.isNotEmpty) {
+              initialAgrochemicalss.add(Agrochemicals(
+                name: widget.log!.tenThuoc!,
+                type: 'pesticides',
+                isOrganic: false,
+              ));
+            }
+            agrochemicalsCubit.setAgrochemicalss(initialAgrochemicalss);
+          }
         } else {
-          // Nếu không có sản phẩm từ FarmingLog, thêm sản phẩm dựa trên công việc
-          List<Agrochemicals> initialAgrochemicalss = [];
-          if (widget.log!.tenPhan != null && widget.log!.tenPhan!.isNotEmpty) {
-            initialAgrochemicalss.add(Agrochemicals(
-              name: widget.log!.tenPhan!,
-              type: 'fertilizer',
-              isOrganic: false,
-            ));
+          // Nếu thêm mới FarmingLog, có thể khởi tạo danh sách sản phẩm rỗng hoặc theo công việc mặc định
+          if (_selectedTask != null) {
+            String productType = _selectedTask!.tenCongViec == 'Bón phân'
+                ? 'fertilizer'
+                : 'pesticides';
+            agrochemicalsCubit.setAgrochemicalss([]);
           }
-          if (widget.log!.tenThuoc != null &&
-              widget.log!.tenThuoc!.isNotEmpty) {
-            initialAgrochemicalss.add(Agrochemicals(
-              name: widget.log!.tenThuoc!,
-              type: 'pesticides',
-              isOrganic: false,
-            ));
-          }
-          agrochemicalsCubit.setAgrochemicalss(initialAgrochemicalss);
-        }
-      } else {
-        // Nếu thêm mới FarmingLog, có thể khởi tạo danh sách sản phẩm rỗng hoặc theo công việc mặc định
-        if (_selectedTask != null) {
-          String productType = _selectedTask!.tenCongViec == 'Bón phân'
-              ? 'fertilizer'
-              : 'pesticides';
-          agrochemicalsCubit.setAgrochemicalss([]);
         }
       }
-    });
+
+      );
+    }
+
   }
 
   void _initializeSelectedItems(
@@ -256,7 +262,6 @@ class _FarmingLogFormState extends State<FarmingLogForm> {
                   onPressed: () {
                     if (productName.text.isNotEmpty) {
                       final newAgrochemicals = Agrochemicals(
-                        id: CustomObjectId().toHexString(),
                         name: productName.text,
                         type: productType,
                         isOrganic: isOrganic,
@@ -653,7 +658,7 @@ class _FarmingLogFormState extends State<FarmingLogForm> {
                                         },
                                         icon: const Icon(Icons.add),
                                         label: Text(
-                                            "Thêm ${_selectedTask!.tenCongViec == 'Bón phân' ? 'phân' : 'th'}"),
+                                            "Thêm ${_selectedTask!.tenCongViec == 'Bón phân' ? 'phân' : 'thuốc'}"),
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: theme.primaryColor,
                                           foregroundColor: Colors.white,
@@ -685,21 +690,21 @@ class _FarmingLogFormState extends State<FarmingLogForm> {
                           ),
                           const SizedBox(height: 15),
                           // Conditional Input: Tên Phân
-                          if (showTenPhan)
-                            InputField(
-                              labelText: 'Tên Phân',
-                              controller: _tenPhanController,
-                              prefixIcon: const Icon(Icons.grass),
-                            ),
-                          if (showTenPhan) const SizedBox(height: 15),
-                          // Conditional Input: Tên Thuốc
-                          if (showTenThuoc)
-                            InputField(
-                              labelText: 'Tên Thuốc',
-                              controller: _tenThuocController,
-                              prefixIcon: const Icon(Icons.local_florist),
-                            ),
-                          if (showTenThuoc) const SizedBox(height: 15),
+                          // if (showTenPhan)
+                          //   InputField(
+                          //     labelText: 'Tên Phân',
+                          //     controller: _tenPhanController,
+                          //     prefixIcon: const Icon(Icons.grass),
+                          //   ),
+                          // if (showTenPhan) const SizedBox(height: 15),
+                          // // Conditional Input: Tên Thuốc
+                          // if (showTenThuoc)
+                          //   InputField(
+                          //     labelText: 'Tên Thuốc',
+                          //     controller: _tenThuocController,
+                          //     prefixIcon: const Icon(Icons.local_florist),
+                          //   ),
+                          // if (showTenThuoc) const SizedBox(height: 15),
                           // Chi Phí Vật Tư
                           InputField(
                             labelText: 'Chi Phí Vật Tư',
