@@ -6,6 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pretty_qr_code/pretty_qr_code.dart'; // Thêm import cho pretty_qr_code
+import 'package:screenshot/screenshot.dart'; // Thêm import cho screenshot
+import 'package:path_provider/path_provider.dart'; // Thêm import cho path_provider
+import 'package:permission_handler/permission_handler.dart'; // Thêm import cho permission_handler
+import 'dart:io'; // Thêm import cho File
+import 'dart:typed_data'; // Thêm import cho Uint8List
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -15,6 +21,9 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  // Tạo một ScreenshotController để chụp ảnh màn hình của QR code
+  final ScreenshotController _screenshotController = ScreenshotController();
+
   @override
   void initState() {
     super.initState();
@@ -76,166 +85,221 @@ class _ProfilePageState extends State<ProfilePage> {
             return const Center(child: CircularProgressIndicator());
           }
           if (state is UserLoaded) {
-          var user = state.user;
+            var user = state.user;
 
-          return ListView(
-            padding: const EdgeInsets.all(16.0),
-            children: [
-              // Hình ảnh hồ sơ và tên người dùng
-              Center(
-                child: Stack(
-                  children: [
-                    CircleAvatar(
-                      radius: 60,
-                      backgroundColor: Colors.green.shade200,
-                      backgroundImage: user?.image != null
-                          ? NetworkImage(imageUrl + (user?.image ?? ""))
-                          : null,
-                      child: user?.image == null
-                          ? Text(
-                              user!.name!.substring(0, 1).toUpperCase(),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineMedium
-                                  ?.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            )
-                          : null,
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: GestureDetector(
-                        onTap: () {
-                          // Thêm chức năng thay đổi hình ảnh hồ sơ
-                          // Ví dụ: mở dialog để chọn ảnh từ thư viện
-                        },
-                        child: const CircleAvatar(
-                          radius: 20,
-                          backgroundColor: Colors.green,
-                          child: Icon(
-                            Icons.edit,
+            return ListView(
+              padding: const EdgeInsets.all(16.0),
+              children: [
+                // Hình ảnh hồ sơ và tên người dùng
+                Center(
+                  child: Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: 60,
+                        backgroundColor: Colors.green.shade200,
+                        backgroundImage: user?.image != null
+                            ? NetworkImage(imageUrl + (user?.image ?? ""))
+                            : null,
+                        child: user?.image == null
+                            ? Text(
+                          user!.name!.substring(0, 1).toUpperCase(),
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineMedium
+                              ?.copyWith(
                             color: Colors.white,
-                            size: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                            : null,
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: GestureDetector(
+                          onTap: () {
+                            // Thêm chức năng thay đổi hình ảnh hồ sơ
+                            // Ví dụ: mở dialog để chọn ảnh từ thư viện
+                          },
+                          child: const CircleAvatar(
+                            radius: 20,
+                            backgroundColor: Colors.green,
+                            child: Icon(
+                              Icons.edit,
+                              color: Colors.white,
+                              size: 20,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              // Tên và email
-              Center(
-                child: Column(
+                const SizedBox(height: 20),
+                // Tên và email
+                Center(
+                  child: Column(
+                    children: [
+                      Text(
+                        user?.name ?? "",
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        user?.email ?? "",
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 30),
+                // Các mục chức năng
+                Column(
                   children: [
-                    Text(
-                      user?.name ?? "",
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                    _buildProfileOption(
+                      context,
+                      icon: FontAwesomeIcons.userPen,
+                      title: "Chỉnh sửa thông tin",
+                      onTap: () {
+                        context.push('/editprofile');
+                      },
                     ),
-                    const SizedBox(height: 5),
-                    Text(
-                      user?.email ?? "",
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.grey[700],
-                          ),
+                    const Divider(height: 1),
+                    _buildProfileOption(
+                      context,
+                      icon: FontAwesomeIcons.lock,
+                      title: "Thay đổi mật khẩu",
+                      onTap: () {
+                        // Điều hướng đến trang thay đổi mật khẩu
+                        context.push('/changepassword');
+                      },
+                    ),
+                    const Divider(height: 1),
+                    _buildProfileOption(
+                      context,
+                      icon: FontAwesomeIcons.bell,
+                      title: "Thông báo",
+                      onTap: () {
+                        // Điều hướng đến trang thông báo
+                        context.push('/notifications');
+                      },
+                    ),
+                    const Divider(height: 1),
+                    _buildProfileOption(
+                      context,
+                      icon: FontAwesomeIcons.gear,
+                      title: "Cài đặt",
+                      onTap: () {
+                        context.push('/settings');
+                      },
+                    ),
+                    const Divider(height: 1),
+                    _buildProfileOption(
+                      context,
+                      icon: FontAwesomeIcons.circleQuestion,
+                      title: "Trợ giúp",
+                      onTap: () {
+                        // Điều hướng đến trang trợ giúp
+                        context.push('/help');
+                      },
+                    ),
+                    const Divider(height: 1),
+                    _buildProfileOption(
+                      context,
+                      icon: FontAwesomeIcons.circleInfo,
+                      title: "Giới thiệu",
+                      onTap: () {
+                        // Điều hướng đến trang giới thiệu
+                        context.push('/about');
+                      },
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 30),
-              // Các mục chức năng
-              Column(
-                children: [
-                  _buildProfileOption(
-                    context,
-                    icon: FontAwesomeIcons.userPen,
-                    title: "Chỉnh sửa thông tin",
-                    onTap: () {
-                      context.push('/editprofile');
-                    },
+                const SizedBox(height: 20),
+                // Thêm QR Code vào cuối trang
+                Center(
+                  child: Column(
+                    children: [
+                      Text(
+                        'QR Code của bạn',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 10),
+                      // Bọc PrettyQr bằng Screenshot để chụp ảnh QR code
+                      Screenshot(
+                        controller: _screenshotController,
+                        child: PrettyQr(
+                          typeNumber: 4,
+                          size: 200,
+                          data: 'https://localhost/timeline?user=${user?.username ?? ''}',
+                          errorCorrectLevel: QrErrorCorrectLevel.M,
+                          roundEdges: true,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      ElevatedButton.icon(
+                        onPressed: () async {
+                          try {
+                            // Chụp ảnh QR code
+                            final Uint8List? image = await _screenshotController.capture();
+                            if (image == null) return;
+
+                            // Yêu cầu quyền lưu trữ
+                            var status = await Permission.storage.request();
+                            if (status.isGranted) {
+                              // Lấy đường dẫn lưu trữ
+                              final directory = await getExternalStorageDirectory();
+                              if (directory == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Không thể lấy đường dẫn lưu trữ')),
+                                );
+                                return;
+                              }
+
+                              // Tạo tệp mới để lưu QR code
+                              final path = directory.path;
+                              final file = File('$path/qrcode_${user?.username ?? 'user'}.png');
+                              await file.writeAsBytes(image);
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('QR Code đã được lưu vào $path')),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Không có quyền truy cập lưu trữ')),
+                              );
+                            }
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Lỗi khi lưu QR Code: $e')),
+                            );
+                          }
+                        },
+                        icon: Icon(Icons.download),
+                        label: Text('Tải xuống QR Code'),
+                      ),
+                    ],
                   ),
-                  const Divider(height: 1),
-                  _buildProfileOption(
-                    context,
-                    icon: FontAwesomeIcons.lock,
-                    title: "Thay đổi mật khẩu",
-                    onTap: () {
-                      // Điều hướng đến trang thay đổi mật khẩu
-                      context.push('/changepassword');
-                    },
-                  ),
-                  const Divider(height: 1),
-                  // _buildProfileOption(
-                  //   context,
-                  //   icon: FontAwesomeIcons.users,
-                  //   title: "Quản lý người ddùng",
-                  //   onTap: () {
-                  //     // Điều hướng đến trang thay đổi mật khẩu
-                  //     context.push('/usermanage');
-                  //   },
-                  // ),
-                  // const Divider(height: 1),
-                  _buildProfileOption(
-                    context,
-                    icon: FontAwesomeIcons.bell,
-                    title: "Thông báo",
-                    onTap: () {
-                      // Điều hướng đến trang thông báo
-                      context.push('/notifications');
-                    },
-                  ),
-                  const Divider(height: 1),
-                  _buildProfileOption(
-                    context,
-                    icon: FontAwesomeIcons.gear,
-                    title: "Cài đặt",
-                    onTap: () {
-                      context.push('/settings');
-                    },
-                  ),
-                  const Divider(height: 1),
-                  _buildProfileOption(
-                    context,
-                    icon: FontAwesomeIcons.circleQuestion,
-                    title: "Trợ giúp",
-                    onTap: () {
-                      // Điều hướng đến trang trợ giúp
-                      context.push('/help');
-                    },
-                  ),
-                  const Divider(height: 1),
-                  _buildProfileOption(
-                    context,
-                    icon: FontAwesomeIcons.circleInfo,
-                    title: "Giới thiệu",
-                    onTap: () {
-                      // Điều hướng đến trang giới thiệu
-                      context.push('/about');
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              // Thêm các phần khác nếu cần
-            ],
-          );
-        }
-        return const SizedBox();
-        }
-      )
-  
+                ),
+                const SizedBox(height: 20),
+                // Thêm các phần khác nếu cần
+              ],
+            );
+          }
+          return const SizedBox();
+        },
+      ),
     );
   }
 
   Widget _buildProfileOption(BuildContext context,
       {required IconData icon,
-      required String title,
-      required VoidCallback onTap}) {
+        required String title,
+        required VoidCallback onTap}) {
     return ListTile(
       leading: FaIcon(
         icon,
@@ -243,7 +307,7 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       title: Text(title),
       trailing:
-          const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+      const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
       onTap: onTap,
     );
   }

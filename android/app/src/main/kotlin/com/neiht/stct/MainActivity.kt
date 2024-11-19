@@ -1,4 +1,4 @@
-package com.example.agricplant.agriplant
+package com.neiht.stct
 
 import io.flutter.embedding.android.FlutterActivity
 

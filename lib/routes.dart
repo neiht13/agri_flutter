@@ -85,12 +85,12 @@ final GoRouter routes = GoRouter(
             return const ChatPage();
           },
         ),
-        // GoRoute(
-        //   path: '/notifications',
-        //   builder: (context, state) {
-        //     return const NotificationsPage();
-        //   },
-        // ),
+        GoRoute(
+          path: '/notifications',
+          builder: (context, state) {
+            return const NotificationsPage();
+          },
+        ),
         GoRoute(
           path: '/map',
           builder: (context, state) =>  const WaterMeterForm(),

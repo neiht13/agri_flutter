@@ -6,8 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 const String baseUrl = 'http://localhost:3000/api';
 // const String baseUrl = 'https://ricedairy.vercel.app/api';
-//const String baseUrl = 'https://gaochauthanhdt.vn/api';
-//  const String baseUrl = 'https://saurienghungdung.vn/api';
+// const String baseUrl = 'https://gaochauthanhdt.vn/api';
+ //const String baseUrl = 'https://saurienghungdung.vn/api';
 //  const String baseUrl = 'https://qr.xoaidinhyen.vn/api';
 //  const String baseUrl = 'https://xoaibinhan.vercel.app/api';
 

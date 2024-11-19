@@ -12,10 +12,16 @@ class AgrochemicalsCubit extends Cubit<AgrochemicalsState> {
 
   // Phương thức để tải sản phẩm từ API
   Future<void> fetchAgrochemicalss(FarmingLog? log) async {
+
     try {
       emit(AgrochemicalsLoading());
-      final agrochemicalss = await agrochemicalsService.fetchAgrochemicalss(log);
-      emit(AgrochemicalsLoaded(agrochemicalss));
+      if (log != null) {
+        final agrochemicalss = await agrochemicalsService.fetchAgrochemicalss(log);
+        emit(AgrochemicalsLoaded(agrochemicalss));
+      } else {
+        emit(AgrochemicalsLoaded([]));
+
+      }
     } catch (e) {
       emit(AgrochemicalsError(e.toString()));
     }
@@ -37,7 +43,7 @@ class AgrochemicalsCubit extends Cubit<AgrochemicalsState> {
     if (state is AgrochemicalsLoaded) {
       final updatedAgrochemicalss = (state as AgrochemicalsLoaded)
           .agrochemicalss
-          .where((agrochemicals) => agrochemicals.id != agrochemicalsId)
+          .where((agrochemicals) => agrochemicals?.id != agrochemicalsId)
           .toList();
       emit(AgrochemicalsLoaded(updatedAgrochemicalss));
     }

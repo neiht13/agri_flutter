@@ -56,7 +56,7 @@ class FarmingLogItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      log.chiTietCongViec ?? "Không có tiêu đề",
+                      log.congViec ?? "Không có tiêu đề",
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
