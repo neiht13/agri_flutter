@@ -4,15 +4,18 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-const String baseUrl = 'http://localhost:3000/api';
+const String baseUrl = 'https://nksx.vnptdongthap.com.vn/api';
+const String baseImageUrl = 'https://nksx.vnptdongthap.com.vn/api';
 // const String baseUrl = 'https://ricedairy.vercel.app/api';
 // const String baseUrl = 'https://gaochauthanhdt.vn/api';
  //const String baseUrl = 'https://saurienghungdung.vn/api';
-//  const String baseUrl = 'https://qr.xoaidinhyen.vn/api';
+// const String baseUrl = 'https://qr.xoaidinhyen.vn/api';
 //  const String baseUrl = 'https://xoaibinhan.vercel.app/api';
 
 class ApiService {
   final Dio _dio;
+    final Dio _imageDio; // New Dio instance for image uploads
+
   static final ApiService _instance = ApiService._internal();
 
   factory ApiService() {
@@ -29,7 +32,18 @@ class ApiService {
             connectTimeout: const Duration(seconds: 60),
             receiveTimeout: const Duration(seconds: 30),
           ),
+        ),
+        _imageDio = Dio(
+          BaseOptions(
+            baseUrl: baseImageUrl,
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            connectTimeout: const Duration(seconds: 60),
+            receiveTimeout: const Duration(seconds: 30),
+          ),
         ) {
+    // Add interceptors to _dio as before
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
         final token = await _getToken();
@@ -39,8 +53,22 @@ class ApiService {
         return handler.next(options);
       },
       onError: (DioException error, handler) {
-        // Xử lý lỗi chung ở đây
-        // Ví dụ: nếu lỗi là do token hết hạn, bạn có thể thực hiện làm mới token
+        // Handle errors
+        return handler.next(error);
+      },
+    ));
+
+    // Optionally, add interceptors to _imageDio if needed
+    _imageDio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) async {
+        final token = await _getToken();
+        if (token != null) {
+          options.headers['Authorization'] = 'Bearer $token';
+        }
+        return handler.next(options);
+      },
+      onError: (DioException error, handler) {
+        // Handle errors specific to image uploads
         return handler.next(error);
       },
     ));
@@ -59,6 +87,10 @@ class ApiService {
   Future<String?> getCurrentUser() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('uId');
+  }
+  Future<void> setCurrentUser(String uId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('uId', uId);
   }
   Future<String?> getCurrentUnit() async {
     final prefs = await SharedPreferences.getInstance();
@@ -165,7 +197,7 @@ class ApiService {
 
   Future<void> uploadImage(String imageName, String imageData) async {
     try {
-      final response = await _dio.post(
+      final response = await _imageDio.post(
         '/images/upload',
         data: jsonEncode({
           'imageName': imageName,
@@ -180,29 +212,6 @@ class ApiService {
       print('Upload hình ảnh lỗi: ${e.response?.data ?? e.message}');
       throw Exception(e.response?.data['message'] ?? 'Tải lên hình ảnh lỗi');
     }
-  }
-
-  Future<Uint8List> fetchImage(String imageName) async {
-    try {
-      final response = await _dio.get(
-        '/images/download/$imageName',
-        queryParameters: {"filename": imageName},
-      );
-
-      if (response.statusCode == 200) {
-        return Uint8List.fromList(response.data);
-      } else {
-        throw Exception('Tải hình ảnh thất bại');
-      }
-    } on DioException catch (e) {
-      print('Fetch hình ảnh lỗi: ${e.response?.data ?? e.message}');
-      throw Exception(e.response?.data['message'] ?? 'tải hình ảnh lỗi');
-    }
-  }
-
-  // Thêm phương thức getImageUrl
-  String getImageUrl(String imageName) {
-    return '$baseUrl/ftp/$imageName';
   }
 
 }

@@ -1,5 +1,7 @@
 // farming_log_page.dart
 
+import 'dart:math';
+
 import 'package:agriplant/api_service.dart';
 import 'package:agriplant/models/cubit/nhatky/nhatky_cubit.dart';
 import 'package:agriplant/models/model/nhatky.dart';
@@ -30,6 +32,7 @@ class _FarmingLogPageState extends State<FarmingLogPage> {
   final TextEditingController _searchController = TextEditingController();
   DateTime? _fromDate;
   DateTime? _toDate;
+  late String initialUserId;
   String? _selectedUserId;
   String currentUserRole = 'USER';
 
@@ -60,6 +63,12 @@ class _FarmingLogPageState extends State<FarmingLogPage> {
       setState(() {
         currentUserRole = role ?? 'USER';
       });
+    }); 
+    
+    ApiService().getCurrentUser().then((value) {
+      setState(() {
+        initialUserId = value!;
+      });
     });
   }
 
@@ -68,6 +77,17 @@ class _FarmingLogPageState extends State<FarmingLogPage> {
       _fromDate = null;
       _toDate = null;
       _selectedUserId = null;
+    });
+  }
+
+  void setUserSelect (String? userId) async {
+    if(userId != null) {
+      await ApiService().setCurrentUser(userId);
+    } else {
+      await ApiService().setCurrentUser(initialUserId);
+    }
+    setState(() {
+      _selectedUserId = userId;
     });
   }
 
@@ -90,9 +110,7 @@ class _FarmingLogPageState extends State<FarmingLogPage> {
                       return ListTile(
                         title: Text(user.name ?? 'No Name'),
                         onTap: () {
-                          setState(() {
-                            _selectedUserId = user.id;
-                          });
+                          setUserSelect(user.id);
                           Navigator.of(context).pop();
                           context.read<FarmingLogCubit>().fetchFarmingLogs(user.id);
                         },

@@ -130,7 +130,7 @@ Widget showAdvancedAlertDialog({
 
 
 
- const imageUrl = "$baseUrl/images/download?filename=";
+ const imageUrl = "${ baseImageUrl != ""? baseImageUrl : baseUrl}/images/download?filename=";
  const noImage = "https://t3.ftcdn.net/jpg/04/34/72/82/360_F_434728286_OWQQvAFoXZLdGHlObozsolNeuSxhpr84.jpg";
 
 
